@@ -1,4 +1,4 @@
-<h1 align="center">Encryptstego</h1>
+<h1 align="center">Stegano</h1>
 <p align="center">
   <img height="150" width="150" src="images/logo.png"/>
 </p>
