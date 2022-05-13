@@ -6,9 +6,14 @@ from tkinter import *
 # windll is Windows OS specific, so must be commented before running on other environments
 from ctypes import windll
 from tkinter import filedialog, messagebox
+import tkinter
 from PIL import ImageTk, Image
+import encodenormal
 import encode
+import decodenormal
 import decode
+import simpledecode
+import simpleencode
 
 # Defining global variables to track if two child windows -
 # for encoding, decoding and help window are in opened or closed state
@@ -27,7 +32,7 @@ file_path = ""
 # ENCODE WINDOW COMPONENTS
 ##########################################################
 # function to open a new window for encoding functionality
-def open_encode_window():
+def open_encode_window(title,type):
     # referencing global variable to reflect modification globally
     global encode_opened
     # checking if the window is already open
@@ -35,7 +40,7 @@ def open_encode_window():
         # Initializing new child window for encoding functions
         encode_window = Toplevel(window)
         # Setting title of the encode window
-        encode_window.title("Encryptstego - Encode")
+        encode_window.title(title)
         # Setting the size of the encode window
         encode_window.geometry('800x500')
         # Setting the resizable property of the encode window to false
@@ -47,52 +52,90 @@ def open_encode_window():
         # so the value of 'windows' at top must be set to 'False' before running on other environments
         if windows:
             windll.shcore.SetProcessDpiAwareness(1)
+        if type==0:
+                    # Label to display image after the image is selected from the file window
+            raw_image_label = Label(encode_window, text="Select Raw Image", height=20, width=50, relief="solid",
+                                    bg="#FFFFFF")
+            # Placing the label on the window statically
+            raw_image_label.place(x=20, y=20)
 
-        # Label to display image after the image is selected from the file window
-        raw_image_label = Label(encode_window, text="Select Raw Image", height=20, width=50, relief="solid",
-                                bg="#FFFFFF")
-        # Placing the label on the window statically
-        raw_image_label.place(x=20, y=20)
+            # Label to indicate text area to enter the text to be encoded
+            text_to_encode_label = Label(encode_window, text="Text to Encode")
+            text_to_encode_label.config(font=("Open Sans", 12))
+            text_to_encode_label.place(x=400, y=20)
 
-        # Label to indicate text area to enter the text to be encoded
-        text_to_encode_label = Label(encode_window, text="Text to Encode")
-        text_to_encode_label.config(font=("Open Sans", 12))
-        text_to_encode_label.place(x=400, y=20)
+            # Textarea to enter the text to be encoded
+            text_to_encode = Text(encode_window, height=7, width=34)
+            text_to_encode.config(relief="solid", font=("Open Sans", 15))
+            text_to_encode.place(x=400, y=51)
 
-        # Textarea to enter the text to be encoded
-        text_to_encode = Text(encode_window, height=7, width=34)
-        text_to_encode.config(relief="solid", font=("Open Sans", 15))
-        text_to_encode.place(x=400, y=51)
+            # Button to browse for raw image to encode the text inside it
+            # Calls a function browse_image() with the label to display the image as argument
+            browse_image_btn = Button(encode_window, text="Browse Raw Image", width=29, cursor="hand2",
+                                    command=lambda: browse_image(raw_image_label))
+            browse_image_btn.config(font=("Open Sans", 15), bg="#36923B", fg="white", borderwidth=0)
+            browse_image_btn.place(x=20, y=350)
 
-        # Label to indicate the text field to enter the password for encoding
-        pass_to_encode_label = Label(encode_window, text="Password")
-        pass_to_encode_label.config(font=("Open Sans", 12))
-        pass_to_encode_label.place(x=400, y=262)
+            # Button to encode the text inside the image and validate password field
+            # Calls a function on separate encode class
+            encode_image_btn = Button(encode_window, text="Encode", width=15, cursor="hand2",
+                                    command=lambda: encode_zero(file_path, 
+                                                                text_to_encode.get("1.0", 'end-1c'),type))
+            encode_image_btn.config(font=("Open Sans", 15), bg="#503066", fg="white", borderwidth=0)
+            encode_image_btn.place(x=592, y=420)
 
-        # Text field to enter the password for encoding
-        pass_to_encode = Entry(encode_window, width=34)
-        pass_to_encode.config(relief="solid", font=("Open Sans", 15), show="*")
-        pass_to_encode.place(x=400, y=293)
+            # setting the value of global tracking variable to true
+            encode_opened = True
+            # assigning a handler to define the actions when the window is tried to close
+            encode_window.protocol("WM_DELETE_WINDOW", lambda: close_encode_window(encode_window))
 
-        # Button to browse for raw image to encode the text inside it
-        # Calls a function browse_image() with the label to display the image as argument
-        browse_image_btn = Button(encode_window, text="Browse Raw Image", width=29, cursor="hand2",
-                                  command=lambda: browse_image(raw_image_label))
-        browse_image_btn.config(font=("Open Sans", 15), bg="#36923B", fg="white", borderwidth=0)
-        browse_image_btn.place(x=20, y=350)
+        else:
+            # Label to display image after the image is selected from the file window
+            raw_image_label = Label(encode_window, text="Select Raw Image", height=20, width=50, relief="solid",
+                                    bg="#FFFFFF")
+            # Placing the label on the window statically
+            raw_image_label.place(x=20, y=20)
 
-        # Button to encode the text inside the image and validate password field
-        # Calls a function on separate encode class
-        encode_image_btn = Button(encode_window, text="Encode", width=15, cursor="hand2",
-                                  command=lambda: encode_image(file_path, pass_to_encode.get(),
-                                                               text_to_encode.get("1.0", 'end-1c')))
-        encode_image_btn.config(font=("Open Sans", 15), bg="#503066", fg="white", borderwidth=0)
-        encode_image_btn.place(x=592, y=420)
+            # Label to indicate text area to enter the text to be encoded
+            text_to_encode_label = Label(encode_window, text="Text to Encode")
+            text_to_encode_label.config(font=("Open Sans", 12))
+            text_to_encode_label.place(x=400, y=20)
 
-        # setting the value of global tracking variable to true
-        encode_opened = True
-        # assigning a handler to define the actions when the window is tried to close
-        encode_window.protocol("WM_DELETE_WINDOW", lambda: close_encode_window(encode_window))
+            # Textarea to enter the text to be encoded
+            text_to_encode = Text(encode_window, height=7, width=34)
+            text_to_encode.config(relief="solid", font=("Open Sans", 15))
+            text_to_encode.place(x=400, y=51)
+
+            # Label to indicate the text field to enter the password for encoding
+
+            pass_to_encode_label = Label(encode_window, text="Password")
+            pass_to_encode_label.config(font=("Open Sans", 12))
+            pass_to_encode_label.place(x=400, y=262)
+
+            # Text field to enter the password for encoding
+            pass_to_encode = Entry(encode_window, width=34)
+            pass_to_encode.config(relief="solid", font=("Open Sans", 15), show="*")
+            pass_to_encode.place(x=400, y=293)
+
+            # Button to browse for raw image to encode the text inside it
+            # Calls a function browse_image() with the label to display the image as argument
+            browse_image_btn = Button(encode_window, text="Browse Raw Image", width=29, cursor="hand2",
+                                    command=lambda: browse_image(raw_image_label))
+            browse_image_btn.config(font=("Open Sans", 15), bg="#36923B", fg="white", borderwidth=0)
+            browse_image_btn.place(x=20, y=350)
+
+            # Button to encode the text inside the image and validate password field
+            # Calls a function on separate encode class
+            encode_image_btn = Button(encode_window, text="Encode", width=15, cursor="hand2",
+                                    command=lambda: encode_image(file_path, pass_to_encode.get(),
+                                                                text_to_encode.get("1.0", 'end-1c'),type))
+            encode_image_btn.config(font=("Open Sans", 15), bg="#503066", fg="white", borderwidth=0)
+            encode_image_btn.place(x=592, y=420)
+
+            # setting the value of global tracking variable to true
+            encode_opened = True
+            # assigning a handler to define the actions when the window is tried to close
+            encode_window.protocol("WM_DELETE_WINDOW", lambda: close_encode_window(encode_window))
 
 
 # method to save the encoded image file on a chosen destination
@@ -106,9 +149,12 @@ def save_image(stego_image):
 
 # Function to call encode class to handle encoding
 # takes path of the raw image, password and text to be encoded as arguments
-def encode_image(image_path, password, text_to_encode):
+def encode_image(image_path, password, text_to_encode,type):
     # calling Encode class constructor
-    encode_action = encode.Encode(image_path, password, text_to_encode)
+    if(type==1):
+        encode_action = encodenormal.EncodeNormal(image_path, password, text_to_encode)
+    else:    
+        encode_action = encode.Encode(image_path, password, text_to_encode)
     # calling method inside Encode class to check if all the values are valid
     msg = encode_action.are_values_valid()
     # checking the status message returned by above function
@@ -127,12 +173,34 @@ def encode_image(image_path, password, text_to_encode):
             # Showing error if any error occurs while encoding the image
             messagebox.showerror("Error Encoding", stego_image[0])
 
+def encode_zero(image_path, text_to_encode,type):
+    # calling Encode class constructor
+   
+    encode_action = simpleencode.SimpleEncode(image_path,  text_to_encode)
+    # calling method inside Encode class to check if all the values are valid
+    msg = encode_action.are_values_valid()
+    # checking the status message returned by above function
+    if not msg[1]:
+        # showing error if the supplied values are invalid
+        messagebox.showerror("Error Encoding", msg[0])
+    else:
+        # calling a method inside Encode class to encode the data into image if all the values are valid
+        stego_image = encode_action.encode_into_image()
+        # checking the returned status message from the function above
+        if stego_image[1]:
+            # calling save_image() function to show the save image dialog and save the output image
+            if save_image(stego_image[0]) is None:
+                messagebox.showinfo("Image Saved", "Encode operation was successful.")
+        else:
+            # Showing error if any error occurs while encoding the image
+            messagebox.showerror("Error Encoding", stego_image[0])            
+
 
 ##########################################################
 # DECODE WINDOW COMPONENTS
 ##########################################################
 # function to open a new window for decoding functionality
-def open_decode_window():
+def open_decode_window(title,type):
     # referencing global variable to reflect modification globally
     global decode_opened
     # checking if the window is already open
@@ -140,7 +208,7 @@ def open_decode_window():
         # Initializing new child window for decoding functions
         decode_window = Toplevel(window)
         # Setting title of the decode window
-        decode_window.title("Encryptstego - Decode")
+        decode_window.title(title)
         # Setting the size of the decode window
         decode_window.geometry('800x500')
         # Setting the resizable property of the decode window to false
@@ -152,58 +220,97 @@ def open_decode_window():
         # so the value of 'windows' at top must be set to 'False' before running on other environments
         if windows:
             windll.shcore.SetProcessDpiAwareness(1)
+        if type==0:  
+            stego_image_label = Label(decode_window, text="Select Stego Image", height=20, width=50, relief="solid",
+                                    bg="#FFFFFF")
+            # Placing the label on the window statically
+            stego_image_label.place(x=20, y=20)
 
-        # Label to display image after the image is selected from the file window
-        stego_image_label = Label(decode_window, text="Select Stego Image", height=20, width=50, relief="solid",
-                                  bg="#FFFFFF")
-        # Placing the label on the window statically
-        stego_image_label.place(x=20, y=20)
+            # Label to indicate textarea to display decoded text
+            text_to_decode_label = Label(decode_window, text="Decoded Text")
+            text_to_decode_label.config(font=("Open Sans", 12))
+            text_to_decode_label.place(x=400, y=20)
 
-        # Label to indicate textarea to display decoded text
-        text_to_decode_label = Label(decode_window, text="Decoded Text")
-        text_to_decode_label.config(font=("Open Sans", 12))
-        text_to_decode_label.place(x=400, y=20)
+            # Textarea to display decoded text
+            text_to_decode = Text(decode_window, height=7, width=34)
+            text_to_decode.config(relief="solid", font=("Open Sans", 15), state=DISABLED)
+            text_to_decode.place(x=400, y=51)
 
-        # Textarea to display decoded text
-        text_to_decode = Text(decode_window, height=7, width=34)
-        text_to_decode.config(relief="solid", font=("Open Sans", 15), state=DISABLED)
-        text_to_decode.place(x=400, y=51)
+         
 
-        # Label to indicate password field to decode the image
-        pass_to_decode_label = Label(decode_window, text="Password")
-        pass_to_decode_label.config(font=("Open Sans", 12))
-        pass_to_decode_label.place(x=400, y=262)
+            # Button to browse for encoded image or stego image to decode
+            # Calls a function browse_image() with the label to display the image as argument
+            browse_stego_btn = Button(decode_window, text="Browse Stego Image", width=29, cursor="hand2",
+                                    command=lambda: browse_image(stego_image_label))
+            browse_stego_btn.config(font=("Open Sans", 15), bg="#503066", fg="white", borderwidth=0)
+            browse_stego_btn.place(x=20, y=350)
 
-        # Text field to enter password to decode the image
-        pass_to_decode = Entry(decode_window, width=34)
-        pass_to_decode.config(relief="solid", font=("Open Sans", 15), show="*")
-        pass_to_decode.place(x=400, y=293)
+            # Button to decode the image and validate password field
+            # Calls a function on separate decode class
+            decode_stego_btn = Button(decode_window, text="Decode", width=15, cursor="hand2",
+                                    command=lambda: decode_zero(file_path,  text_to_decode,type))
+            decode_stego_btn.config(font=("Open Sans", 15), bg="#36923B", fg="white", borderwidth=0)
+            decode_stego_btn.place(x=592, y=420)
 
-        # Button to browse for encoded image or stego image to decode
-        # Calls a function browse_image() with the label to display the image as argument
-        browse_stego_btn = Button(decode_window, text="Browse Stego Image", width=29, cursor="hand2",
-                                  command=lambda: browse_image(stego_image_label))
-        browse_stego_btn.config(font=("Open Sans", 15), bg="#503066", fg="white", borderwidth=0)
-        browse_stego_btn.place(x=20, y=350)
+            # Setting the status of decode_window as true to denote that decode window is open
+            decode_opened = True
+            # assigning a handler to define the actions when the window is tried to close
+            decode_window.protocol("WM_DELETE_WINDOW", lambda: close_decode_window(decode_window))  
+        else:
+            # Label to display image after the image is selected from the file window
+            stego_image_label = Label(decode_window, text="Select Stego Image", height=20, width=50, relief="solid",
+                                    bg="#FFFFFF")
+            # Placing the label on the window statically
+            stego_image_label.place(x=20, y=20)
 
-        # Button to decode the image and validate password field
-        # Calls a function on separate decode class
-        decode_stego_btn = Button(decode_window, text="Decode", width=15, cursor="hand2",
-                                  command=lambda: decode_image(file_path, pass_to_decode.get(), text_to_decode))
-        decode_stego_btn.config(font=("Open Sans", 15), bg="#36923B", fg="white", borderwidth=0)
-        decode_stego_btn.place(x=592, y=420)
+            # Label to indicate textarea to display decoded text
+            text_to_decode_label = Label(decode_window, text="Decoded Text")
+            text_to_decode_label.config(font=("Open Sans", 12))
+            text_to_decode_label.place(x=400, y=20)
 
-        # Setting the status of decode_window as true to denote that decode window is open
-        decode_opened = True
-        # assigning a handler to define the actions when the window is tried to close
-        decode_window.protocol("WM_DELETE_WINDOW", lambda: close_decode_window(decode_window))
+            # Textarea to display decoded text
+            text_to_decode = Text(decode_window, height=7, width=34)
+            text_to_decode.config(relief="solid", font=("Open Sans", 15), state=DISABLED)
+            text_to_decode.place(x=400, y=51)
+
+            # Label to indicate password field to decode the image
+            pass_to_decode_label = Label(decode_window, text="Password")
+            pass_to_decode_label.config(font=("Open Sans", 12))
+            pass_to_decode_label.place(x=400, y=262)
+
+            # Text field to enter password to decode the image
+            pass_to_decode = Entry(decode_window, width=34)
+            pass_to_decode.config(relief="solid", font=("Open Sans", 15), show="*")
+            pass_to_decode.place(x=400, y=293)
+
+            # Button to browse for encoded image or stego image to decode
+            # Calls a function browse_image() with the label to display the image as argument
+            browse_stego_btn = Button(decode_window, text="Browse Stego Image", width=29, cursor="hand2",
+                                    command=lambda: browse_image(stego_image_label))
+            browse_stego_btn.config(font=("Open Sans", 15), bg="#503066", fg="white", borderwidth=0)
+            browse_stego_btn.place(x=20, y=350)
+
+            # Button to decode the image and validate password field
+            # Calls a function on separate decode class
+            decode_stego_btn = Button(decode_window, text="Decode", width=15, cursor="hand2",
+                                    command=lambda: decode_image(file_path, pass_to_decode.get(), text_to_decode,type))
+            decode_stego_btn.config(font=("Open Sans", 15), bg="#36923B", fg="white", borderwidth=0)
+            decode_stego_btn.place(x=592, y=420)
+
+            # Setting the status of decode_window as true to denote that decode window is open
+            decode_opened = True
+            # assigning a handler to define the actions when the window is tried to close
+            decode_window.protocol("WM_DELETE_WINDOW", lambda: close_decode_window(decode_window))
 
 
 # Function to call decode class to handle decoding
 # takes path of the stego image, password and text field to show decoded text as arguments
-def decode_image(image_path, password, text_field):
+def decode_image(image_path, password, text_field,type):
     # calling Decode class constructor
-    decode_action = decode.Decode(image_path, password)
+    if(type==1):
+        decode_action = decodenormal.DecodeNormal(image_path, password)
+    else:
+        decode_action = decode.Decode(image_path, password)
     # calling a method inside Decode class to check if all the supplied arguments are valid
     # returns status with status message
     msg = decode_action.are_values_valid()
@@ -230,6 +337,37 @@ def decode_image(image_path, password, text_field):
         else:
             # showing error message if any error occurs during decoding process
             messagebox.showerror("Error Decoding", decoded_text[0])
+def decode_zero(image_path,  text_field,type):
+    # calling Decode class constructor
+   
+    decode_action = simpledecode.SimpleDecode(image_path)
+
+    # calling a method inside Decode class to check if all the supplied arguments are valid
+    # returns status with status message
+    msg = decode_action.are_values_valid()
+    # checkin the status of the returned message
+    if not msg[1]:
+        # showing error message if the supplied values are not valid
+        messagebox.showerror("Error Decoding", msg[0])
+    else:
+        # calling method inside Decode class to decode the text inside image
+        # returns text or error message with boolean status value
+        decoded_text = decode_action.decode_from_image()
+        # checking status of the message and if message extraction is successful, displaying on the window
+        if decoded_text[1]:
+            # enabling the disabled text widget on the decode window
+            text_field.config(state=NORMAL)
+            # clearing the text field before inserting the decoded text
+            text_field.delete(1.0, END)
+            # inserting the decoded text
+            text_field.insert(1.0, decoded_text[0])
+            # re-disabling the widget to prevent accidental insertion
+            text_field.config(state=DISABLED)
+            # showing success message
+            messagebox.showinfo("Text Decoded", "Decode operation was successful.")
+        else:
+            # showing error message if any error occurs during decoding process
+            messagebox.showerror("Error Decoding", decoded_text[0])            
 
 
 ##########################################################
@@ -364,7 +502,7 @@ logo = ImageTk.PhotoImage(logo)
 window.iconphoto(True, logo)
 
 # Initializing label to display image on the window
-image_label = Label(window, image=logo, height=100, width=100)
+image_label = Label(window, image=logo, height=100, width=200)
 # Packing the label on the window
 image_label.pack(pady=20)
 
@@ -374,22 +512,50 @@ title_label = Label(window, text="Encryptstego")
 title_label.pack()
 # Setting font configurations for the label - font family and font size
 title_label.config(font=("Open Sans", 32))
+simple_encode_btn = Button(window, text="Simple Encode", height=2, width=15, bg="#503066", fg="white", cursor="hand2", borderwidth=0,
+                    command=lambda: open_encode_window(title="Simple Encryption",type=0))
+simple_encode_btn.config(font=("Open Sans", 15, "bold"))
+# Packing the button on the window
+simple_encode_btn.place(x=50,y=100)
+
+normal_encode_btn = Button(window, text="Normal Encode", height=2, width=15, bg="#503066", fg="white", cursor="hand2", borderwidth=0,
+                    command=lambda: open_encode_window(title="Normal Encryption",type=1))
+normal_encode_btn.config(font=("Open Sans", 15, "bold"))
+# Packing the button on the window
+normal_encode_btn.place(x=50,y=200)
+
+                 
 
 # Initializing button for encode action
-encode_btn = Button(window, text="Encode", height=2, width=15, bg="#503066", fg="white", cursor="hand2", borderwidth=0,
-                    command=open_encode_window)
+retro_encode_btn = Button(window, text="Retro Encode", height=2, width=15, bg="#503066", fg="white", cursor="hand2", borderwidth=0,
+                     command=lambda: open_encode_window(title="Retro Encryption",type=2))
+
 # Setting font configurations for the button - font family, font size and font weight
-encode_btn.config(font=("Open Sans", 15, "bold"))
+retro_encode_btn.config(font=("Open Sans", 15, "bold"))
 # Packing the button on the window
-encode_btn.pack(side=LEFT, padx=50)
+retro_encode_btn.pack(side=LEFT, padx=50)
+# Initializing button for the decode button
+simple_decode_btn=Button(window, text="Simple Decode", height=2, width=15, bg="#36923B", fg="white", cursor="hand2", borderwidth=0,
+                    command=lambda: open_decode_window(title="Simple Decryption",type=0))
+simple_decode_btn.config(font=("Open Sans", 15, "bold"))
+# Packing the button on the window
+simple_decode_btn.place(x=560,y=100) 
 
 # Initializing button for the decode button
-decode_btn = Button(window, text="Decode", height=2, width=15, bg="#36923B", fg="white", cursor="hand2", borderwidth=0,
-                    command=open_decode_window)
-# Setting font configurations for the button - font family, font size and font weight
-decode_btn.config(font=("Open Sans", 15, "bold"))
+normal_decode_btn=Button(window, text="Normal Decode", height=2, width=15, bg="#36923B", fg="white", cursor="hand2", borderwidth=0,
+                    command=lambda: open_decode_window(title="Normal Decryption",type=1))
+normal_decode_btn.config(font=("Open Sans", 15, "bold"))
 # Packing the button on the window
-decode_btn.pack(side=RIGHT, padx=50)
+normal_decode_btn.place(x=560,y=200)  
+retro_decode_btn = Button(window, text="Retro Decode", height=2, width=15, bg="#36923B", fg="white", cursor="hand2", borderwidth=0,
+                    command=lambda: open_decode_window(title="Retro Decryption",type=2))
+# Setting font configurations for the button - font family, font size and font weight
+retro_decode_btn.config(font=("Open Sans", 15, "bold"))
+# Packing the button on the window
+retro_decode_btn.pack(side=RIGHT, padx=50)  
+
+
+
 
 # Initializing footer name label
 footer_label = Label(window, text="XYZ")
