@@ -1,4 +1,4 @@
-# Python GUI program for Image Steganography with encryption - Encryptstego v1.0
+# Python GUI program for Image Steganography with encryption - stegtool v1.0
 # Created by Harish
 
 # Importing required libraries
@@ -141,7 +141,7 @@ def open_encode_window(title,type):
 # method to save the encoded image file on a chosen destination
 def save_image(stego_image):
     # getting the path of the destination to save
-    save_path = filedialog.asksaveasfile(initialfile="encryptstego.png", mode="wb", defaultextension=".png",
+    save_path = filedialog.asksaveasfile(initialfile="stegoimage.png", mode="wb", defaultextension=".png",
                                          filetypes=(("Image File", "*.png"), ("All Files", "*.*")))
     # saving the image
     stego_image.save(save_path)
@@ -453,13 +453,13 @@ def help_menu():
             windll.shcore.SetProcessDpiAwareness(1)
 
         # Label to indicate textarea to display title text
-        text_to_decode_label = Label(help_window, text="\nEncryptstego v1.0\nDeveloped by Harish and Jawahar")
+        text_to_decode_label = Label(help_window, text="\nSTEGTOOL v1.0\nDeveloped by Harish and Jawahar")
         text_to_decode_label.config(font=("Open Sans", 12))
         text_to_decode_label.pack()
 
         # Label to indicate textarea to display help text
         text_to_decode_label = Label(help_window,
-                                     text="Encryptstego is an Image Steganography tool "
+                                     text="STEGTOOL is an Image Steganography tool "
                                           "used to embed text messages into an Image. The "
                                           "embedded text is encrypted using the password."
                                           "\n\nTo encode the message into an image, click on Encode"
@@ -481,7 +481,7 @@ def help_menu():
 # Initializing tkinter window
 window = Tk()
 # Setting title of the window
-window.title("Encryptstego")
+window.title("STEGTOOL")
 # Setting the size of the window
 window.geometry('800x500')
 # Setting the resizable property of the window to false
@@ -493,7 +493,7 @@ if windows:
     windll.shcore.SetProcessDpiAwareness(1)
 
 # Getting the logo image for displaying on window as well as title
-logo = Image.open("../images/logo.png")
+logo = Image.open("../images/logotool.png")
 # Resizing the image for proper view
 logo = logo.resize((100, 100), Image.ANTIALIAS)
 # Creating PhotoImage object from the image
@@ -507,18 +507,18 @@ image_label = Label(window, image=logo, height=100, width=200)
 image_label.pack(pady=20)
 
 # Initializing label to display title label on the window
-title_label = Label(window, text="Encryptstego")
+title_label = Label(window, text="STEGTOOL")
 # Packing the label on the window
 title_label.pack()
 # Setting font configurations for the label - font family and font size
 title_label.config(font=("Open Sans", 32))
-simple_encode_btn = Button(window, text="Simple Encode", height=2, width=15, bg="#503066", fg="white", cursor="hand2", borderwidth=0,
+simple_encode_btn = Button(window, text="Simple Encode", height=2, width=15, bg="#00dc7f", fg="white", cursor="hand2", borderwidth=0,
                     command=lambda: open_encode_window(title="Simple Encryption",type=0))
 simple_encode_btn.config(font=("Open Sans", 15, "bold"))
 # Packing the button on the window
 simple_encode_btn.place(x=50,y=100)
 
-normal_encode_btn = Button(window, text="Normal Encode", height=2, width=15, bg="#503066", fg="white", cursor="hand2", borderwidth=0,
+normal_encode_btn = Button(window, text="Normal Encode", height=2, width=15, bg="#00dc7f", fg="white", cursor="hand2", borderwidth=0,
                     command=lambda: open_encode_window(title="Normal Encryption",type=1))
 normal_encode_btn.config(font=("Open Sans", 15, "bold"))
 # Packing the button on the window
@@ -527,7 +527,7 @@ normal_encode_btn.place(x=50,y=200)
                  
 
 # Initializing button for encode action
-retro_encode_btn = Button(window, text="Retro Encode", height=2, width=15, bg="#503066", fg="white", cursor="hand2", borderwidth=0,
+retro_encode_btn = Button(window, text="Retro Encode", height=2, width=15, bg="#00dc7f", fg="white", cursor="hand2", borderwidth=0,
                      command=lambda: open_encode_window(title="Retro Encryption",type=2))
 
 # Setting font configurations for the button - font family, font size and font weight
@@ -535,19 +535,19 @@ retro_encode_btn.config(font=("Open Sans", 15, "bold"))
 # Packing the button on the window
 retro_encode_btn.pack(side=LEFT, padx=50)
 # Initializing button for the decode button
-simple_decode_btn=Button(window, text="Simple Decode", height=2, width=15, bg="#36923B", fg="white", cursor="hand2", borderwidth=0,
+simple_decode_btn=Button(window, text="Simple Decode", height=2, width=15, bg="#00a861", fg="white", cursor="hand2", borderwidth=0,
                     command=lambda: open_decode_window(title="Simple Decryption",type=0))
 simple_decode_btn.config(font=("Open Sans", 15, "bold"))
 # Packing the button on the window
 simple_decode_btn.place(x=560,y=100) 
 
 # Initializing button for the decode button
-normal_decode_btn=Button(window, text="Normal Decode", height=2, width=15, bg="#36923B", fg="white", cursor="hand2", borderwidth=0,
+normal_decode_btn=Button(window, text="Normal Decode", height=2, width=15, bg="#00a861", fg="white", cursor="hand2", borderwidth=0,
                     command=lambda: open_decode_window(title="Normal Decryption",type=1))
 normal_decode_btn.config(font=("Open Sans", 15, "bold"))
 # Packing the button on the window
 normal_decode_btn.place(x=560,y=200)  
-retro_decode_btn = Button(window, text="Retro Decode", height=2, width=15, bg="#36923B", fg="white", cursor="hand2", borderwidth=0,
+retro_decode_btn = Button(window, text="Retro Decode", height=2, width=15, bg="#00a861", fg="white", cursor="hand2", borderwidth=0,
                     command=lambda: open_decode_window(title="Retro Decryption",type=2))
 # Setting font configurations for the button - font family, font size and font weight
 retro_decode_btn.config(font=("Open Sans", 15, "bold"))
